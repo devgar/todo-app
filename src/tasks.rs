@@ -57,3 +57,22 @@ pub fn complete_task(journal_path: PathBuf, task_position: usize) -> Tesult<()> 
     serde_json::to_writer(file, &tasks)?;
     Ok(())
 }
+
+pub fn list_tasks(journal_path: PathBuf) -> Result<()> {
+    let file = OpenOptions::new().read(true).open(journal_path)?;
+
+    let tasks = collect_tasks(&file)?;
+
+    if task.is_empty() {
+        println!("Task list is empty");
+    } else {
+        let mut order: u32 = 1;
+        for tasks in tasks {
+            println!("{}: {}", order, task);
+            order += 1;
+        }
+    }
+
+    Ok(())
+}
+
