@@ -29,5 +29,5 @@ pub struct CommandLineArgs {
 
     /// Use a different journal file.
     #[structopt(parse(from_os_str), short, long)]
-    pub journal_file: Option<PathBuf>,
+    pub journal_path: Option<PathBuf>,
 }
