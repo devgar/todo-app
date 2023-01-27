@@ -1,25 +1,35 @@
-use std::env::args;
+use anyhow::anyhow;
 use std::path::PathBuf;
+use structopt::StructOpt;
 
-use regex::Regex;
+mod cli;
+mod tasks;
 
-#[derive(Debug)]
-struct Cli { pattern: Regex, path: PathBuf }
+use cli::{Action::*, CommandLineArgs};
+use tasks::Task;
 
-impl Cli {
-    pub fn new(pattern: & str, path: & str) -> Cli {
-        Cli {
-            pattern: Regex::new(pattern).expect("Invalid regex"),
-            path: PathBuf::from(path)
-        }
-    }
+fn find_default_journal_file() -> Option<PathBuf> {
+    home::home_dir().map(|mut path| {
+        path.push(".rusty-journal.json");
+        path
+    })
 }
 
-fn main() {
+fn main() -> anyhow::Result<()>{
+    // Get the command-line arguments.
+    let CommandLineArgs {
+        action,
+        journal_path,
+    } = CommandLineArgs::from_args();
 
-    let pattern = args().nth(1).expect("no pattern given");
-    let path = args().nth(2).expect("no path given");
-    println!(" - pattern: {0:?}\n - path: {1:?}", &pattern, &path);
-    let args = Cli::new(&pattern, &path);
-    println!("Args built: {:?}", args);
+    let journal_path = journal_path
+        .or_else(find_default_journal_file)
+        .ok_or(anyhow!("Failed to find journal file."))?;
+
+    match action {
+        Add { text } => tasks::add_task(journal_path, Task::new(text)),
+        List => tasks::list_tasks(journal_path),
+        Done { position } => tasks::complete_task(journal_path, position),
+    }?;
+    Ok(())
 }
