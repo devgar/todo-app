@@ -41,7 +41,7 @@ fn collect_tasks(mut file: &File) -> Result<Vec<Task>> {
 
 pub fn add_task(journal_path: PathBuf, task: Task) -> Result<()> {
     // Open the file.
-    let mut file = OpenOptions::new()
+    let file = OpenOptions::new()
         .read(true)
         .write(true)
         .create(true)
@@ -55,18 +55,18 @@ pub fn add_task(journal_path: PathBuf, task: Task) -> Result<()> {
     Ok(())
 }
 
-pub fn complete_task(journal_path: PathBuf, task_position: usize) -> Tesult<()> {
+pub fn complete_task(journal_path: PathBuf, task_position: usize) -> Result<()> {
     let file = OpenOptions::new()
         .read(true)
         .write(true)
         .open(journal_path)?;
     
-    let tasks = collect_tasks(&file)?;
+    let mut tasks = collect_tasks(&file)?;
 
-    if task_position == 0 || task_position > task.len() {
+    if task_position == 0 || task_position > tasks.len() {
         return Err(Error::new(ErrorKind::InvalidInput, "Invalid Task ID"));
     }
-    task.remove(task_position - 1);
+    tasks.remove(task_position - 1);
 
     file.set_len(0)?;
     serde_json::to_writer(file, &tasks)?;
@@ -78,11 +78,11 @@ pub fn list_tasks(journal_path: PathBuf) -> Result<()> {
 
     let tasks = collect_tasks(&file)?;
 
-    if task.is_empty() {
+    if tasks.is_empty() {
         println!("Task list is empty");
     } else {
         let mut order: u32 = 1;
-        for tasks in tasks {
+        for task in tasks {
             println!("{}: {}", order, task);
             order += 1;
         }
