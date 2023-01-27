@@ -1,6 +1,6 @@
 use std::fs::{File, OpenOptions};
 use std::path::PathBuf;
-use std::io::{Result, Seek, SeekFrom};
+use std::io::{Error, ErrorKind, Result, Seek, SeekFrom};
 
 use chrono::{serde::ts_seconds, DateTime, Local, Utc};
 use serde::{Deserialize, Serialize};
@@ -35,5 +35,29 @@ pub fn add_task(journal_path: PathBuf, task: Task) -> Result<()> {
     tasks.push(task);
     serde_json::to_writer(file, &tasks)?;
 
+    Ok(())
+}
+
+pub fn complete_task(journal_path: PathBuf, task_position: usize) -> Tesult<()> {
+    let file = OpenOption::new()
+        .read(true)
+        .write(true)
+        .open(journal_path)?;
+    
+    let tasks = match serde_json::from_reader(file) {
+        Ok(tasks) => tasks,
+        Err(e) if e.is_eof() => Vec::new(),
+        Err(e) => Err(e)?,
+    };
+    
+    if task_position == 0 || task_position > task.len() {
+        return Err(Error::new(ErrorKind::InvalidInput, "Invalid Task ID"));
+    }
+    task.remove(task_position - 1);
+
+    file.seek(SeekFrom::Start(0))?;
+    file.set_len(0)?;
+
+    serde_json::to_writer(file, &tasks)?;
     Ok(())
 }
