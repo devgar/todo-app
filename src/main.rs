@@ -34,12 +34,9 @@ fn main() -> anyhow::Result<()>{
     match action {
         Add { text } => tasks::add_task(journal_path, Task::new(text)),
         List => tasks::list_tasks(journal_path),
-        Done { task_position } => {
-            let task_position = task_position
-                .unwrap_or_else(|| ask_complete(&journal_path)
-                .unwrap());
-            tasks::complete_task(journal_path, task_position)
-        },
+        Done { task_position } => task_position
+            .map_or_else(|| ask_complete(&journal_path), |v| Ok(v))
+            .and_then(|task_position|tasks::complete_task(journal_path, task_position)),
     }?;
     Ok(())
 }
