@@ -12,7 +12,7 @@ pub enum Action {
     /// Remove an entry from the journal file by position.
     Done {
         #[structopt()]
-        position: usize,
+        task_position: Option<usize>,
     },
     /// List all tasks in the journal file.
     List,

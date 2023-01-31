@@ -4,6 +4,7 @@ use structopt::StructOpt;
 
 mod cli;
 mod tasks;
+mod dialog;
 
 use cli::{Action::*, CommandLineArgs};
 use tasks::Task;
@@ -13,6 +14,13 @@ fn find_default_journal_file() -> Option<PathBuf> {
         path.push(".rusty-journal.json");
         path
     })
+}
+
+fn ask_complete(journal_path: PathBuf) -> std::io::Result<()> {
+    let journal_clone = journal_path.clone();
+    let items = tasks::get_tasks(journal_path)?;
+    let task_position = dialog::ask(&items)?;
+    tasks::complete_task(journal_clone, task_position)
 }
 
 fn main() -> anyhow::Result<()>{
@@ -29,7 +37,10 @@ fn main() -> anyhow::Result<()>{
     match action {
         Add { text } => tasks::add_task(journal_path, Task::new(text)),
         List => tasks::list_tasks(journal_path),
-        Done { position } => tasks::complete_task(journal_path, position),
+        Done { task_position } => match task_position {
+            Some(task_position) => tasks::complete_task(journal_path, task_position),
+            None => ask_complete(journal_path),
+        },
     }?;
     Ok(())
 }
