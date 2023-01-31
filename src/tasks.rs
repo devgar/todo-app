@@ -73,13 +73,13 @@ pub fn complete_task(journal_path: PathBuf, task_position: usize) -> Result<()> 
     Ok(())
 }
 
-pub fn get_tasks(journal_path: PathBuf) -> Result<Vec<Task>> {
+pub fn get_tasks(journal_path:& PathBuf) -> Result<Vec<Task>> {
     let file = OpenOptions::new().read(true).open(journal_path)?;
     collect_tasks(&file)
 }
 
 pub fn list_tasks(journal_path: PathBuf) -> Result<()> {
-    let tasks = get_tasks(journal_path)?;
+    let tasks = get_tasks(&journal_path)?;
 
     if tasks.is_empty() {
         println!("Task list is empty");
