@@ -29,13 +29,13 @@ fn main() -> anyhow::Result<()>{
 
     let journal_path = journal_path
         .or_else(find_default_journal_file)
-        .ok_or(anyhow!("Failed to find journal file."))?;
+        .ok_or_else(|| anyhow!("Failed to find journal file."))?;
 
     match action {
         Add { text } => tasks::add_task(journal_path, Task::new(text)),
         List => tasks::list_tasks(journal_path),
         Done { task_position } => task_position
-            .map_or_else(|| ask_complete(&journal_path), |v| Ok(v))
+            .map_or_else(|| ask_complete(&journal_path), Ok)
             .and_then(|task_position|tasks::complete_task(journal_path, task_position)),
     }?;
     Ok(())
