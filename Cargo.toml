@@ -18,3 +18,7 @@ version = "0.4"
 [dependencies.serde]  # Add serde in its own section.
 features = ["derive"] # We'll need the derive feature.
 version = "1.0"
+
+[dependencies.dialoguer]
+features = ["fuzzy-select"]
+version = "0.10.3"
