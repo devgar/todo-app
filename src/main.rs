@@ -32,7 +32,7 @@ fn main() -> anyhow::Result<()>{
         .ok_or(anyhow!("Failed to find journal file."))?;
 
     match action {
-        Add { text } => tasks::add_task(journal_path, Task::new(text)),
+        Add { text } => tasks::add_task(journal_path, Task::new(text.join(" "))),
         List => tasks::list_tasks(journal_path),
         Done { task_position } => task_position
             .map_or_else(|| ask_complete(&journal_path), |v| Ok(v))
