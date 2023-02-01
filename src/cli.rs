@@ -6,8 +6,8 @@ pub enum Action {
     /// Write tasks to the journal file.
     Add {
         /// The task description text.
-        #[structopt()]
-        text: String,
+        #[structopt(required = true)]
+        text: Vec<String>,
     },
     /// Remove an entry from the journal file by position.
     Done {
